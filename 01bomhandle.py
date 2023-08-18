@@ -18,7 +18,6 @@ thin_border = openpyxl.styles.borders.Border(left=openpyxl.styles.borders.Side(s
 # 创建一个新的Excel文件
 workbook = openpyxl.Workbook()
 # 选择一个工作表
-#sheet = workbook.active
 MySheet = (workbook.create_sheet("电子料",0),workbook.create_sheet("结构料",1),workbook.create_sheet("包材",2))
 BomSheetName = ["2 PCBA","3 FA","1 PACKAGING"]
 
@@ -53,7 +52,7 @@ Temporary_Start = [0,0,0] #临时区开始
 for file_name in file_list:
     print("开始处理",file_name)
     #打开excel表
-    ReadWorkbook = openpyxl.load_workbook(folder_path+'/'+file_name)
+    ReadWorkbook = openpyxl.load_workbook(folder_path+'/'+file_name,data_only=True)
     #获取型号
     Model_Last=file_name.find(".xlsx")
     if Model_Last>0:
@@ -224,6 +223,3 @@ try:
     print("保存使用比例完成")
 except:
     print("保存使用比例失败,请勿操作文档")
-
-
-
