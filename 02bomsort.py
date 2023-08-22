@@ -198,8 +198,8 @@ for i in range(3):
                 ETALocation=openpyxl.utils.get_column_letter(j)+str(k+1)
                 InventoryLocation=openpyxl.utils.get_column_letter(j-1)+str(k+2)
                 NewSheet[i].cell(k+2,j).value = "="+InventoryLocation+"+"+ETALocation+"-"+RequirementLocation
-            if((NewSheet[0].cell(k,offset+1).value!=None)and(OldMaterials!=NewSheet[0].cell(k,offset+1).value)):
-                OldMaterials=NewSheet[0].cell(k,offset+1).value
+            if((NewSheet[i].cell(k,offset+1).value!=None)and(OldMaterials!=NewSheet[i].cell(k,offset+1).value)):
+                OldMaterials=NewSheet[i].cell(k,offset+1).value
                 ''' 共用料
                 NewSheet[i].cell(k,offset*2+SpaceSize+10).border = thin_border #边框
                 NewSheet[i].cell(k,offset*2+SpaceSize+10).alignment = cell_format #居中
