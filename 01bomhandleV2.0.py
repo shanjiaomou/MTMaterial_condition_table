@@ -160,9 +160,12 @@ def Sheet_Handle(SheetBuf,array):
                 SMbuf = 0                                                   #更新替代料编号缓存
             
             for array_i in range(2,ArrayRow):                               #遍历数组
-                if(array_get(array,array_i,0)==PartNO):                     #索引料号是否有匹配
+                if(array_get(array,array_i,1)==PartNO):                     #索引料号是否有匹配
                     array = array_set(array,array_i,ArrayItem,PartItem)     #写入序号
                     array = array_set(array,array_i,ArrayDos, Dosage)       #写入用量
+                    setbuf = array_get(array,array_i,3)                     #获取适用型号
+                    Model_Name = setbuf+","+array_get(array,1, ArrayItem)   #获取当前型号
+                    array = array_set(array,array_i,3,Model_Name)           #设置适用型号
                     SMbuf = array_get(array,array_i,0)                      #获取匹配替代料编号
                     break                                                   #跳出本次遍历
             else:                                                           #索引不到料号
@@ -170,6 +173,8 @@ def Sheet_Handle(SheetBuf,array):
                 array = array_set(array,EndAddr,2,          Description)    #写入描述
                 array = array_set(array,EndAddr,ArrayItem,  PartItem)       #写入序号
                 array = array_set(array,EndAddr,ArrayDos,   Dosage)         #写入用量
+                Model_Name = array_get(array,1, ArrayItem)                  #获取当前型号
+                array = array_set(array,EndAddr,3,          Model_Name)     #设置适用型号
                 EndAddr+=1                                                  #缓存结束地址+1
     else:
         if(EndAddr>StartAddr):                                      #上一个序号有缓存
@@ -191,60 +196,53 @@ def Sheet_Handle(SheetBuf,array):
 
 def bom_format(array):
     ArrayCol = array_col(array)
-    ModelCol = int((ArrayCol-3)/2)
+    ModelCol = int((ArrayCol-4)/2)
     for i in range(ModelCol):
         array = CutInsert_col(array,(ArrayCol-2-i),0)
     return array
 
 def bom_UseRatio(array):
     ArrayCol = array_col(array)
-    ModelCol = int((ArrayCol-3)/2)                 #替代料位置
+    ModelCol = int((ArrayCol-4)/2)                 #替代料位置
     array_set(array, 0, ArrayCol, "现有库存")       #插入现有库存列
-    array=insert_col(array,ModelCol+3)
-    array_set(array, 0, ModelCol+3, "使用比例")     #插入使用比例列
+    array=insert_col(array,ModelCol+4)
+    array_set(array, 0, ModelCol+4, "使用比例")     #插入使用比例列
     array=insert_col(array,ModelCol+2)
     array_set(array, 0, ModelCol+2, "迈腾代码")     #插入迈腾代码列
-    RatioLie = ModelCol+4                          #使用比例位置
+    RatioLie = ModelCol+5                          #使用比例位置
     MateStart = 0                                   #初始化索引行开始
     ArrayRow = array_row(array)
     OldItem = 0                                                             #初始化旧序号
-    for row_i in range(3,ArrayRow):#↓
-        PartItem = array_get(array,row_i,ModelCol)
-        if(OldItem!=PartItem):
+    for row_i in range(2,ArrayRow):                         #行遍历
+        RatioFile = 0   #初始化使用比例标志
+        PartItem = array_get(array,row_i,ModelCol)          #获取序号
+        if(OldItem!=PartItem):                              #序号变更
             array = array_set(array,row_i,RatioLie,"1")
             MateStart = row_i
             OldItem = PartItem
-        '''
-        else :
-            ArrayCol = array_col(array)
-            for col_i in range(ModelCol+5,ArrayCol):#→
-                if(array_get(array,row_i,col_i) is None):
-                    pass
-                else :
-                    for row_j in range(MateStart,row_i):#↓
-                        if(array_get(array,row_j,col_i) is None):
-                            pass
-                        else:
+        else:
+            ArrayCol = array_col(array)#获取总列数
+            ProcRow = array[row_i]
+            for col_i in range(ModelCol+5,ArrayCol):#位遍历
+                if(ProcRow[col_i] != None):
+                    for row_j in range(MateStart,row_i):
+                        if(array_get(array,row_j,col_i) != None):
+                            ProcRow[col_i] = None
                             break
                     else:
-                        for col_j in range(ModelCol+5,ArrayCol):
-                            for row_j in range(MateStart,row_i):
-                                if(array_get(array,row_j,col_j) is None):
-                                    pass
-                                else:
-                                    array = array_set(array,)
-                                    break
-                            
-                        break
-                    '''
-        
+                        RatioFile += 1
+                        ProcRow[RatioLie]="1"
+            if(RatioFile!=0):
+                array[row_i]=ProcRow
+            else:
+                array = array_set(array,row_i,RatioLie,"0")     
     return array 
 
 
 def main_app(self):
-    TotalArray = [[["替代料","小米料号","物料描述"],[None,None,None]],
-                  [["替代料","小米料号","物料描述"],[None,None,None]],
-                  [["替代料","小米料号","物料描述"],[None,None,None]]]
+    TotalArray = [[["替代料","小米料号","物料描述","适用型号"],[None,None,None,None]],
+                  [["替代料","小米料号","物料描述","适用型号"],[None,None,None,None]],
+                  [["替代料","小米料号","物料描述","适用型号"],[None,None,None,None]]]
     Clear_log(self)
     # 获取文件夹中的所有文件和文件夹
     folder_path = self.tk_input_lm0omywa.get()
