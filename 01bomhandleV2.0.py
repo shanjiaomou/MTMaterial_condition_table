@@ -381,7 +381,7 @@ class WinGUI(Tk):
         self.title("Tkinter布局助手")
         # 设置窗口大小、居中
         width = 420
-        height = 440
+        height = 240
         screenwidth = self.winfo_screenwidth()
         screenheight = self.winfo_screenheight()
         geometry = '%dx%d+%d+%d' % (width, height, (screenwidth - width) / 2, (screenheight - height) / 2)
@@ -426,7 +426,7 @@ class WinGUI(Tk):
         btn.place(x=340, y=60, width=60, height=30)
         return btn
     def __tk_label_lm0opp7u(self,parent):
-        label = Label(parent,text="正在处理：",anchor="w" )
+        label = Label(parent,text="请选择文件夹并开始",anchor="w" )
         label.place(x=20, y=60, width=220, height=30)
         return label
     def __tk_progressbar_lm0p6l8w(self,parent):
@@ -435,8 +435,8 @@ class WinGUI(Tk):
         return progressbar
     def __tk_text_lm0p7c95(self,parent):
         text = Text(parent,state="disabled")
-        text.place(x=20, y=120, width=380, height=300)
-        self.vbar(text, 20, 120, 380, 300,parent)
+        text.place(x=20, y=120, width=380, height=100)
+        self.vbar(text, 20, 120, 380, 100,parent)
         return text
 class Win(WinGUI):
     def __init__(self):
