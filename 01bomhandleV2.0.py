@@ -5,7 +5,7 @@ QQ交流群:788392508
 """
 import os
 import openpyxl
-import random
+import datetime
 from tkinter import filedialog
 from tkinter import messagebox
 from tkinter import *
@@ -164,7 +164,8 @@ def Sheet_Handle(SheetBuf,array):
                     array = array_set(array,array_i,ArrayItem,PartItem)     #写入序号
                     array = array_set(array,array_i,ArrayDos, Dosage)       #写入用量
                     setbuf = array_get(array,array_i,3)                     #获取适用型号
-                    Model_Name = setbuf+","+array_get(array,1, ArrayItem)   #获取当前型号
+                                                                            #获取当前型号
+                    Model_Name = setbuf+","+array_get(array,1, ArrayItem).replace(" 序号", "")
                     array = array_set(array,array_i,3,Model_Name)           #设置适用型号
                     SMbuf = array_get(array,array_i,0)                      #获取匹配替代料编号
                     break                                                   #跳出本次遍历
@@ -173,7 +174,8 @@ def Sheet_Handle(SheetBuf,array):
                 array = array_set(array,EndAddr,2,          Description)    #写入描述
                 array = array_set(array,EndAddr,ArrayItem,  PartItem)       #写入序号
                 array = array_set(array,EndAddr,ArrayDos,   Dosage)         #写入用量
-                Model_Name = array_get(array,1, ArrayItem)                  #获取当前型号
+                                                                            #获取当前型号
+                Model_Name = array_get(array,1, ArrayItem).replace(" 序号", "")
                 array = array_set(array,EndAddr,3,          Model_Name)     #设置适用型号
                 EndAddr+=1                                                  #缓存结束地址+1
     else:
@@ -204,15 +206,15 @@ def bom_format(array):
 def bom_UseRatio(array):
     ArrayCol = array_col(array)
     ModelCol = int((ArrayCol-4)/2)                 #替代料位置
-    array_set(array, 0, ArrayCol, "现有库存")       #插入现有库存列
     array=insert_col(array,ModelCol+4)
     array_set(array, 0, ModelCol+4, "使用比例")     #插入使用比例列
     array=insert_col(array,ModelCol+2)
     array_set(array, 0, ModelCol+2, "迈腾代码")     #插入迈腾代码列
-    RatioLie = ModelCol+5                          #使用比例位置
+    RatioLie = ModelCol+5                           #使用比例位置
     MateStart = 0                                   #初始化索引行开始
     ArrayRow = array_row(array)
-    OldItem = 0                                                             #初始化旧序号
+    OldItem = 0                                     #初始化旧序号
+    ArrayCol = array_col(array)#获取总列数
     for row_i in range(2,ArrayRow):                         #行遍历
         RatioFile = 0   #初始化使用比例标志
         PartItem = array_get(array,row_i,ModelCol)          #获取序号
@@ -221,9 +223,8 @@ def bom_UseRatio(array):
             MateStart = row_i
             OldItem = PartItem
         else:
-            ArrayCol = array_col(array)#获取总列数
-            ProcRow = array[row_i]
-            for col_i in range(ModelCol+5,ArrayCol):#位遍历
+            ProcRow = array[row_i].copy()
+            for col_i in range(RatioLie+1,ArrayCol):#位遍历
                 if(ProcRow[col_i] != None):
                     for row_j in range(MateStart,row_i):
                         if(array_get(array,row_j,col_i) != None):
@@ -235,14 +236,14 @@ def bom_UseRatio(array):
             if(RatioFile!=0):
                 array[row_i]=ProcRow
             else:
-                array = array_set(array,row_i,RatioLie,"0")     
+                array = array_set(array,row_i,RatioLie,"0")
+    array_set(array, 0, ArrayCol, "初期库存")       #插入现有库存列
     return array 
 
-
 def main_app(self):
-    TotalArray = [[["替代料","小米料号","物料描述","适用型号"],[None,None,None,None]],
-                  [["替代料","小米料号","物料描述","适用型号"],[None,None,None,None]],
-                  [["替代料","小米料号","物料描述","适用型号"],[None,None,None,None]]]
+    TotalArray = [[["序号","小米料号","物料描述","项目号"],[None,None,None,None]],
+                  [["序号","小米料号","物料描述","项目号"],[None,None,None,None]],
+                  [["序号","小米料号","物料描述","项目号"],[None,None,None,None]]]
     Clear_log(self)
     # 获取文件夹中的所有文件和文件夹
     folder_path = self.tk_input_lm0omywa.get()
@@ -275,18 +276,18 @@ def main_app(self):
             BomSheet = BomWorkBook[BomSheetName]
             if(0<BomSheetName.find("PACKAGING")):
                 ArrayCol      = array_col(TotalArray[2])
-                TotalArray[2] = array_set(TotalArray[2],1,ArrayCol,  Model_Name)
-                TotalArray[2] = array_set(TotalArray[2],1,ArrayCol+1,Model_Name)
+                TotalArray[2] = array_set(TotalArray[2],1,ArrayCol,  Model_Name+" 序号")
+                TotalArray[2] = array_set(TotalArray[2],1,ArrayCol+1,Model_Name+" 用量")
                 TotalArray[2] = Sheet_Handle(BomSheet,TotalArray[2])
             elif(0<BomSheetName.find("PCBA")):
                 ArrayCol      = array_col(TotalArray[0])
-                TotalArray[0] = array_set(TotalArray[0],1,ArrayCol,  Model_Name)
-                TotalArray[0] = array_set(TotalArray[0],1,ArrayCol+1,Model_Name)                
+                TotalArray[0] = array_set(TotalArray[0],1,ArrayCol,  Model_Name+" 序号")
+                TotalArray[0] = array_set(TotalArray[0],1,ArrayCol+1,Model_Name+" 用量")                
                 TotalArray[0] = Sheet_Handle(BomSheet,TotalArray[0])
             elif(0<BomSheetName.find("FA")):
                 ArrayCol      = array_col(TotalArray[1])
-                TotalArray[1] = array_set(TotalArray[1],1,ArrayCol,  Model_Name)
-                TotalArray[1] = array_set(TotalArray[1],1,ArrayCol+1,Model_Name)
+                TotalArray[1] = array_set(TotalArray[1],1,ArrayCol,  Model_Name+" 序号")
+                TotalArray[1] = array_set(TotalArray[1],1,ArrayCol+1,Model_Name+" 用量")
                 TotalArray[1] = Sheet_Handle(BomSheet,TotalArray[1])
         #释放处理完的工作簿
         BomWorkBook.close()
@@ -324,10 +325,13 @@ def main_app(self):
             win.update()#更新界面
             OutSheet[i].append(TotalArray[i][j])
     try:
-        SaveName=".\BOM整合清单.xlsx"
+        # 获取当前日期
+        current_date = str(datetime.date.today().strftime("%Y%m%d"))
+        SaveName=".\BOM整合清单"+current_date+".xlsx"
         OutWorkBook.save(SaveName)
     except:
-        SaveName=".\BOM整合清单"+str(random.randint(0,65535))+".xlsx"
+        current_datetime = str(datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
+        SaveName=".\BOM整合清单"+current_datetime+".xlsx"
         OutWorkBook.save(SaveName)
     OutWorkBook.close
     print_label(self,"保存："+SaveName)
@@ -356,16 +360,18 @@ def main_app(self):
             win.update()#更新界面
             OutSheet[i].append(TotalArray[i][j])
     try:
-        SaveName=".\BOM使用比例清单.xlsx"
+        current_date = str(datetime.date.today().strftime("%Y%m%d"))
+        SaveName=".\BOM使用比例清单"+current_date+".xlsx"
         OutWorkBook.save(SaveName)
     except:
-        SaveName=".\BOM使用比例清单"+str(random.randint(0,65535))+".xlsx"
+        current_datetime = str(datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
+        SaveName=".\BOM使用比例清单"+current_datetime+".xlsx"
         OutWorkBook.save(SaveName)
     OutWorkBook.close
     print_label(self,"保存："+SaveName)
     print_log(self,"保存："+SaveName)
     win.update()#更新界面
-    
+#UI#######################################################################
 class WinGUI(Tk):
     def __init__(self):
         super().__init__()
@@ -378,7 +384,7 @@ class WinGUI(Tk):
         self.tk_progressbar_lm0p6l8w = self.__tk_progressbar_lm0p6l8w(self)
         self.tk_text_lm0p7c95 = self.__tk_text_lm0p7c95(self)
     def __win(self):
-        self.title("Tkinter布局助手")
+        self.title("BOM整合比例工具")
         # 设置窗口大小、居中
         width = 420
         height = 240
