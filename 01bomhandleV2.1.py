@@ -110,7 +110,7 @@ def Clear_log(self):
 def set_Prog(self,value,maximum):
     self.tk_progressbar_lm0p6l8w["maximum"]=maximum
     self.tk_progressbar_lm0p6l8w["value"]=value
-#创建数组，并初始化（设置表头）
+#App#######################################################################
 #用下面函数处理数据
 
 def Sheet_Handle(SheetBuf,array):
@@ -239,7 +239,6 @@ def bom_UseRatio(array):
                 array = array_set(array,row_i,RatioLie,"0")
     for col_i in range(ModelCol+1):
         array = CutInsert_col(array,ArrayCol-1,ModelCol)
-    array_set(array, 0, ArrayCol, "初期库存")       #插入现有库存列
     return array 
 
 def main_app(self):
