@@ -6,9 +6,129 @@ QQ交流群:788392508
 import os
 import openpyxl
 from tkinter import filedialog
+from tkinter import messagebox
 from tkinter import *
 from tkinter.ttk import *
 from typing import Dict
+import time
+
+
+#设置数组数据
+def array_set(array, row, col, value):
+    # 获取二维数组的行数和列数
+    rows = len(array)
+    cols = len(array[0])
+    # 如果插入位置超出数组范围，则扩展数组并使用空值补全
+    if col >= cols:
+        for i in range(cols, col ):
+            for i in range(rows):
+                array[i].insert(col, None)
+        # 在指定位置插入新列
+        for i in range(rows):
+            array[i].insert(col, None)
+        # 获取二维数组的行数和列数
+        cols = len(array[0])
+    values=[None for _ in range(cols)]
+    # 如果插入位置超出数组范围，则扩展数组并使用空值补全
+    if row >= rows:
+        for i in range(rows, row ):
+            array.insert(i, values)
+        # 在指定位置插入新行
+        array.insert(row, values)
+    # 在指定位置插入值
+    array[row][col] = value
+    return array
+#获取数组数据
+def array_get(array, row, col):
+    # 获取二维数组的行数和列数
+    rows = len(array)   #行
+    cols = len(array[0])#列
+    # 如果插入位置超出数组范围，则扩展数组并使用空值补全
+    if row >= rows or col >= cols:
+        return False
+    return array[row][col]
+#插入行
+def insert_row(array, row_index):
+    # 获取二维数组的行数和列数
+    rows = len(array)
+    cols = len(array[0])
+    values=[None for _ in range(cols)]
+    # 如果插入位置超出数组范围，则扩展数组并使用空值补全
+    if row_index > rows:
+        for i in range(rows, row_index ):
+            array.insert(i, values)
+    # 在指定位置插入新行
+    array.insert(row_index, values)
+    return array
+#插入列
+def insert_col(array, col_index):
+    # 获取二维数组的行数和列数
+    rows = len(array)
+    cols = len(array[0])
+
+    # 如果插入位置超出数组范围，则扩展数组并使用空值补全
+    if col_index > cols:
+        for i in range(cols, col_index ):
+            for i in range(rows):
+                array[i].insert(col_index, None)
+    # 在指定位置插入新列
+    for i in range(rows):
+        array[i].insert(col_index, None)
+    return array   
+#插入剪切行
+def CutInsert_row(array,origin,finish):
+    # 将第origin行剪切插入第finish行前面
+    row_to_insert = array.pop(origin)  # 移除第origin行并保存
+    array.insert(finish, row_to_insert)  # 在第finish行前面插入移除的行
+    return array
+#插入剪切列
+def CutInsert_col(array,origin,finish):
+    # 将第origin列剪切插入第finish列前面
+    for row in array:
+        col_to_insert = row.pop(origin)  # 移除第origin列并保存
+        row.insert(finish, col_to_insert)  # 在第finish列前面插入移除的列
+    return array
+#获取行数
+def array_row(array):
+    return len(array)
+#获取列数
+def array_col(array):
+    return len(array[0])
+#UI界面
+def show_error(srtbuf):
+    messagebox.showerror("错误", srtbuf)
+def print_label(self,srtbuf):
+    self.tk_label_lm3lw72f["text"]=srtbuf
+def print_log(self,srtbuf):
+    self.tk_text_lm3m3ylm.configure(state="normal")
+    self.tk_text_lm3m3ylm.insert(END,srtbuf+"\r\n")
+    self.tk_text_lm3m3ylm.configure(state="disabled")
+    self.tk_text_lm3m3ylm.see(END)
+def Clear_log(self):
+    self.tk_text_lm3m3ylm.configure(state="normal")
+    self.tk_text_lm3m3ylm.delete("1.0", END)
+    self.tk_text_lm3m3ylm.configure(state="disabled")
+def set_Prog(self,value,maximum):
+    self.tk_progressbar_lm3lze9x["maximum"]=maximum
+    self.tk_progressbar_lm3lze9x["value"]=value
+#App#######################################################################
+
+def main_app(self):
+    Clear_log(self)
+    Bom_path = self.tk_input_lm3ln8cp.get()
+    Plan_path = self.tk_input_lm3lqahh.get()
+    if(os.path.isfile(Bom_path)==False):
+        show_error("请正确选择BOM清单!")
+        return
+    if(os.path.isfile(Plan_path)==False):
+        show_error("请正确选择计划!")
+        return
+    Bom_name = os.path.basename(Bom_path)
+    Plan_name = os.path.basename(Plan_path)
+    
+
+#UI#######################################################################
+
 class WinGUI(Tk):
     def __init__(self):
         super().__init__()
@@ -97,7 +217,7 @@ class WinGUI(Tk):
         progressbar.place(x=20, y=140, width=560, height=10)
         return progressbar
     def __tk_text_lm3m3ylm(self,parent):
-        text = Text(parent)
+        text = Text(parent,state="disabled")
         text.place(x=20, y=170, width=560, height=100)
         self.vbar(text, 20, 170, 560, 100,parent)
         return text
@@ -117,8 +237,12 @@ class Win(WinGUI):
             self.tk_input_lm3lqahh.insert(END, file_path)  # 将选择的目录路径填入输入框
     def StartProcessEvent(self):#(self,evt):
         self.tk_button_lm3lx0ji.config(state=DISABLED)
-        print("<Button>事件未处理:")
+        self.tk_check_button_lm3lwui9.config(state=DISABLED)
+        win.update()#更新界面
+        main_app(self)
+        self.tk_check_button_lm3lwui9.config(state=NORMAL)
         self.tk_button_lm3lx0ji.config(state=NORMAL)
+        
     def __event_bind(self):
         #self.tk_button_lm3lnzud.bind('<Button>',self.OpenBomEvent)
         #self.tk_button_lm3lqeut.bind('<Button>',self.OpenPlanEvent)
