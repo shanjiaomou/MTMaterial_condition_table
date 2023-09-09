@@ -205,11 +205,11 @@ def bom_format(array):
 
 def bom_UseRatio(array):
     ArrayCol = array_col(array)
-    ModelCol = int((ArrayCol-4)/2)                 #替代料位置
+    ModelCol = int((ArrayCol-4)/2)                  #替代料位置
     array=insert_col(array,ModelCol+4)
-    array_set(array, 0, ModelCol+4, "使用比例")     #插入使用比例列
+    array=array_set(array, 0, ModelCol+4, "使用比例")      #插入使用比例列
     array=insert_col(array,ModelCol+2)
-    array_set(array, 0, ModelCol+2, "迈腾代码")     #插入迈腾代码列
+    array=array_set(array, 0, ModelCol+2, "迈腾代码")      #插入迈腾代码列
     RatioLie = ModelCol+5                           #使用比例位置
     MateStart = 0                                   #初始化索引行开始
     ArrayRow = array_row(array)
@@ -219,7 +219,7 @@ def bom_UseRatio(array):
         RatioFile = 0   #初始化使用比例标志
         PartItem = array_get(array,row_i,ModelCol)          #获取序号
         if(OldItem!=PartItem):                              #序号变更
-            array = array_set(array,row_i,RatioLie,"1")
+            array = array_set(array,row_i,RatioLie,1)
             MateStart = row_i
             OldItem = PartItem
         else:
@@ -232,11 +232,11 @@ def bom_UseRatio(array):
                             break
                     else:
                         RatioFile += 1
-                        ProcRow[RatioLie]="1"
+                        ProcRow[RatioLie]=1
             if(RatioFile!=0):
                 array[row_i]=ProcRow
             else:
-                array = array_set(array,row_i,RatioLie,"0")
+                array = array_set(array,row_i,RatioLie,0)
     for col_i in range(ModelCol+1):
         array = CutInsert_col(array,ArrayCol-1,ModelCol)
     return array 
