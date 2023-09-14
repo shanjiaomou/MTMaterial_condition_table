@@ -349,43 +349,70 @@ def main_app(self):
 
     #TotalArray.close()#释放内存
     
-    if(self.checkbox_var.get()==1):
+    
+    for i in range(3):
         
-        for i in range(3):
-            print_label(self,"生成格式:"+str(i-1)+"/"+str(3))
-            print_log(self,"开始生成格式..")
-            win.update()#更新界面
-            RowStart = 0
-            ColStart = 0
-            RowMax = OutSheet[i].max_row
-            ColMax = OutSheet[i].max_column
-            align = Alignment(horizontal='center', vertical='center' , wrapText=True)
-            for Row_i in range(1,OutSheet[i].max_row):#索引开始行（BOM）
-                if(OutSheet[i].cell(Row_i,1).value!=None):
-                    RowStart = Row_i
-                    break
-            for Col_i in range(1,OutSheet[i].max_column):#索引开始列（计划）
-                if(OutSheet[i].cell(1,Col_i).value!=None):
-                    ColStart = Col_i
-                    break
-            for Col_i in range(1,ColStart-2):
-                OutSheet[i].column_dimensions[get_column_letter(Col_i)].width = 4
-            for Col_i in range(ColStart-1,ColMax+1):
-                StartCx = CxTransform(RowStart,Col_i)
-                endCx = CxTransform(RowStart+1,Col_i)
+        print_log(self,"生成格式:"+str(i+1)+"/"+str(3))
+        win.update()#更新界面
+        RowStart = 0
+        ColStart = 0
+        RowMax = OutSheet[i].max_row
+        ColMax = OutSheet[i].max_column
+        align = Alignment(horizontal='center', vertical='center' , wrapText=True)
+        for Row_i in range(1,OutSheet[i].max_row):#索引开始行（BOM）
+            if(OutSheet[i].cell(Row_i,1).value!=None):
+                RowStart = Row_i
+                break
+        for Col_i in range(1,OutSheet[i].max_column):#索引开始列（计划）
+            if(OutSheet[i].cell(1,Col_i).value!=None):
+                ColStart = Col_i
+                break
+        for Col_i in range(1,ColStart-2):
+            OutSheet[i].column_dimensions[get_column_letter(Col_i)].width = 4
+        for Col_i in range(ColStart-3,ColMax+1):
+            StartCx = CxTransform(RowStart,Col_i)
+            endCx = CxTransform(RowStart+1,Col_i)
+            OutSheet[i].merge_cells(StartCx+':'+endCx)  # 合并单元格
+            OutSheet[i][StartCx].alignment = align      # 设置水平和垂直对齐方式为居中
+        MaterialMax = int((RowMax - RowStart - 1)/3)
+        SerialNumOld = 0
+        StartCx = CxTransform(1,1)
+        for Row_i in range(MaterialMax):
+            SerialNumNew = OutSheet[i].cell(RowStart+2+Row_i*3,ColStart-3).value
+            if(SerialNumOld!=SerialNumNew):
+                if(SerialNumOld!=0):
+                    endCx = CxTransform(RowStart+1+Row_i*3,ColStart-3)
+                    OutSheet[i].merge_cells(StartCx+':'+endCx)  # 合并单元格
+                    OutSheet[i][StartCx].alignment = align      # 设置水平和垂直对齐方式为居中
+                StartCx = CxTransform(RowStart+2+Row_i*3,ColStart-3)
+                SerialNumOld=SerialNumNew
+        else:
+            endCx = CxTransform(RowStart+1+MaterialMax*3,ColStart-3)
+            OutSheet[i].merge_cells(StartCx+':'+endCx)  # 合并单元格
+            OutSheet[i][StartCx].alignment = align      # 设置水平和垂直对齐方式为居中
+        #####合并表格
+        for Col_i in range(ColStart-2,ColStart+6):
+            print_label(self,"格式:"+str(Col_i+1)+"/"+str(ColStart+6))
+            for Row_i in range(MaterialMax):
+                set_Prog(self,Row_i+1,MaterialMax)#更新进度条
+                win.update()#更新界面
+                StartCx = CxTransform(RowStart+2+Row_i*3,Col_i)
+                endCx = CxTransform(RowStart+4+Row_i*3,Col_i)
                 OutSheet[i].merge_cells(StartCx+':'+endCx)  # 合并单元格
                 OutSheet[i][StartCx].alignment = align      # 设置水平和垂直对齐方式为居中
+        
+    '''
+    if(self.checkbox_var.get()==1):  
+        for i in range(3):
             for Col_i in range(1,ColStart+5):
                 set_Prog(self,Col_i,ColStart+5)#更新进度条
                 win.update()#更新界面
-                MaterialMax = int((RowMax - RowStart - 1)/3)
                 for Row_i in range(MaterialMax):
                     StartCx = CxTransform(RowStart+2+Row_i*3,Col_i)
                     endCx = CxTransform(RowStart+4+Row_i*3,Col_i)
                     OutSheet[i].merge_cells(StartCx+':'+endCx)  # 合并单元格
                     OutSheet[i][StartCx].alignment = align      # 设置水平和垂直对齐方式为居中
-            #设置列宽
-            
+            '''
             
             
 
@@ -417,7 +444,7 @@ class WinGUI(Tk):
     def __init__(self):
         super().__init__()
         self.__win()
-        self.checkbox_var = IntVar(value=1)
+        self.checkbox_var = IntVar(value=0)
         self.tk_label_lm3lm3mh = self.__tk_label_lm3lm3mh(self)
         self.tk_input_lm3ln8cp = self.__tk_input_lm3ln8cp(self)
         self.tk_button_lm3lnzud = self.__tk_button_lm3lnzud(self)
@@ -489,7 +516,7 @@ class WinGUI(Tk):
         label.place(x=20, y=100, width=360, height=30)
         return label
     def __tk_check_button_lm3lwui9(self,parent):
-        cb = Checkbutton(parent,text="生成格式",variable=self.checkbox_var)
+        cb = Checkbutton(parent,text="生成格式",variable=self.checkbox_var,state=DISABLED)
         cb.place(x=400, y=100, width=80, height=30)
         return cb
     def __tk_button_lm3lx0ji(self,parent):
@@ -521,10 +548,10 @@ class Win(WinGUI):
             self.tk_input_lm3lqahh.insert(END, file_path)  # 将选择的目录路径填入输入框
     def StartProcessEvent(self):#(self,evt):
         self.tk_button_lm3lx0ji.config(state=DISABLED)
-        self.tk_check_button_lm3lwui9.config(state=DISABLED)
+        #self.tk_check_button_lm3lwui9.config(state=DISABLED)
         win.update()#更新界面
         main_app(self)
-        self.tk_check_button_lm3lwui9.config(state=NORMAL)
+        #self.tk_check_button_lm3lwui9.config(state=NORMAL)
         self.tk_button_lm3lx0ji.config(state=NORMAL)
         
     def __event_bind(self):
