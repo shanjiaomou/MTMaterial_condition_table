@@ -259,7 +259,7 @@ def bom_UseRatio(array):
     ItemEnd = 0
     for row_i in range(2,ArrayRow):                         #行遍历
         array = array_set(array,row_i,RatioLie,0)
-    for row_i in range(2,ArrayRow):
+    for row_i in range(2,ArrayRow+1):
         PartItem = array_get(array,row_i,ModelCol)          #获取序号
         if(OldItem!=PartItem):                              #序号变更
             ItemStart = ItemEnd
@@ -281,29 +281,6 @@ def bom_UseRatio(array):
                                     for col_j in range(col_i):
                                         if(array_get(array,row_j,RatioLie+1+col_j)!=None):
                                             array = array_set(array,row_j,RatioLie+1+col_j,None)#清除用量
-            
-        
-        # RatioFile = 0                                       #初始化使用比例标志
-        # PartItem = array_get(array,row_i,ModelCol)          #获取序号
-        # if(OldItem!=PartItem):                              #序号变更
-        #     array = array_set(array,row_i,RatioLie,1)
-        #     MateStart = row_i
-        #     OldItem = PartItem
-        # else:
-        #     ProcRow = array[row_i].copy()
-        #     for col_i in range(RatioLie+1,ArrayCol):#位遍历
-        #         if(ProcRow[col_i] != None):
-        #             for row_j in range(MateStart,row_i):
-        #                 if(array_get(array,row_j,col_i) != None):
-        #                     ProcRow[col_i] = None
-        #                     break
-        #             else:
-        #                 RatioFile += 1
-        #                 ProcRow[RatioLie]=1
-        #     if(RatioFile!=0):
-        #         array[row_i]=ProcRow
-        #     else:
-        #         array = array_set(array,row_i,RatioLie,0)
     for col_i in range(ModelCol+1):
         array = CutInsert_col(array,ArrayCol-1,ModelCol)
     return array 
@@ -467,7 +444,7 @@ class WinGUI(Tk):
         self.tk_progressbar_lm0p6l8w = self.__tk_progressbar_lm0p6l8w(self)
         self.tk_text_lm0p7c95 = self.__tk_text_lm0p7c95(self)
     def __win(self):
-        self.title("BOM整合比例工具")
+        self.title("BOM整合比例工具V2.2")
         # 设置窗口大小、居中
         width = 420
         height = 240

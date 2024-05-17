@@ -457,7 +457,7 @@ class WinGUI(Tk):
         self.tk_progressbar_lm3lze9x = self.__tk_progressbar_lm3lze9x(self)
         self.tk_text_lm3m3ylm = self.__tk_text_lm3m3ylm(self)
     def __win(self):
-        self.title("Tkinter布局助手")
+        self.title("料况输出V2.1")
         # 设置窗口大小、居中
         width = 600
         height = 290
